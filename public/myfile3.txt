@@ -1,0 +1,1 @@
+drink response type,button_reply

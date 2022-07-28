@@ -1,0 +1,19 @@
+{
+                          "type": "reply",
+                          "reply": {
+                            "id": "juice",
+                            "title": "Juice"
+                          }
+                        },{
+                          "type": "reply",
+                          "reply": {
+                            "id": "fizzy_drink",
+                            "title": "Fizzy Drink"
+                          }
+                        },{
+                          "type": "reply",
+                          "reply": {
+                            "id": "water",
+                            "title": "Water"
+                          }
+                        },
