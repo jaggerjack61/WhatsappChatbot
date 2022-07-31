@@ -62,6 +62,10 @@ class WebhookController extends Controller
                     $this->handleResponse($arr);
 
                 }
+                elseif(array_key_exists('list_reply', $arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive'])) {
+                    $this->handleList($arr);
+
+                }
             }
 
 //            $keys=$arr['entry'][0]['changes'][0]['value']['messages'][0];
@@ -103,7 +107,33 @@ class WebhookController extends Controller
                 ));
         }
         elseif($message == 'bye') {
-            $this->sendMsgText('Thank you for eating here. Have a nice day!!!!');
+            $this->sendMsgList(array(
+                'header'=>'Restaurant Name',
+                'body'=>'Welcome '.$contact.' to Restaurant Name whatsapp chatbot. Where you can order food and have it delivered to your doorstep.',
+                'footer'=>'Get Started',
+                'button'=>'Food Menu'),
+            array(
+                [
+                    'id'=>'pizza',
+                    'title'=>'Pizza',
+                    'description'=>'Meat and Vegan pizzas for you to devour'
+                ],
+                [
+                    'id'=>'burger',
+                    'title'=>'Burgers',
+                    'description'=>'Mouth watering burgers'
+                ],
+                [
+                    'id'=>'deserts',
+                    'title'=>'Deserts',
+                    'description'=>'Tasty treats and sweets'
+                ],
+                [
+                    'id'=>'drink',
+                    'title'=>'Drinks',
+                    'description'=>'You thirsty huh?'
+                ]));
+            //$this->sendMsgText('Thank you for eating here. Have a nice day!!!!');
         }
 
     }
@@ -117,9 +147,10 @@ class WebhookController extends Controller
 
     public function handleResponse($arr)
     {
-        $fptr = fopen('myfile3.txt', 'w');
-        fwrite($fptr,$arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id'].' response '.implode(',',array_keys($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive'])));
-        fclose($fptr);
+
+//        $fptr = fopen('myfile3.txt', 'w');
+//        fwrite($fptr,$arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id'].' response '.implode(',',array_keys($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive'])));
+//        fclose($fptr);
         $this->phone=$arr['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id'];
         if($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='pizza'){
             $this->sendMsgInteractive(array(
@@ -187,6 +218,75 @@ class WebhookController extends Controller
                     ['id'=>'water','title'=>'Water']
                 ));
         }
+
+    }
+
+    public function handleList($arr)
+    {
+        $this->phone=$arr['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id'];
+    if($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='pizza'){
+
+        $this->sendMsgList(array(
+            'header'=>'Pizza Menu',
+            'body'=>'Welcome to our pizza menu of meat and vegan options.',
+            'footer'=>'Copyright 2022',
+            'button'=>'Pizza Menu'),
+            array(
+                [
+                    'id'=>'pizza_pepperoni',
+                    'title'=>'Pepperoni Pizza',
+                    'description'=>'Pepperoni and cheese pizza'
+                ],
+                [
+                    'id'=>'pizza_pineapple',
+                    'title'=>'Pineapple Pizza',
+                    'description'=>'The wierd kid of the pizza family'
+                ],
+                [
+                    'id'=>'pizza_mushroom',
+                    'title'=>'Mushroom Pizza',
+                    'description'=>'Someone actually orders this pizza?'
+                ],
+                [
+                    'id'=>'pizza_chicken_mushroom',
+                    'title'=>'Chicken Mushroom Pizza',
+                    'description'=>'The best pizza on the planet, fight me if you disagree'
+                ]));
+        }
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='burger'){
+
+            $this->sendMsgList(array(
+                'header'=>'Burger Menu',
+                'body'=>'Welcome to our burger menu of meat and vegan options.',
+                'footer'=>'Copyright 2022',
+                'button'=>'Burger Menu'),
+                array(
+                    [
+                        'id'=>'burger_plain',
+                        'title'=>'Beef Burger',
+                        'description'=>'Ground Beef Burger'
+                    ],
+                    [
+                        'id'=>'burger_cheese',
+                        'title'=>'Cheese Burger',
+                        'description'=>'Ground Beef and Cheese Burger'
+                    ],
+                    [
+                        'id'=>'burger_chilli',
+                        'title'=>'Beef Chilli Burger',
+                        'description'=>'Its time to harass your taste buds'
+                    ],
+                    [
+                        'id'=>'burger_vegan',
+                        'title'=>'Vegan Burger',
+                        'description'=>'For all the people who hate fun'
+                    ],
+                    [
+                        'id'=>'burger_chicken',
+                        'title'=>'Chicken Burger',
+                        'description'=>'Why for the love of god why?'
+                    ]));
+        }
     }
 
 
@@ -230,9 +330,9 @@ class WebhookController extends Controller
                           }
                         },';
         }
-        $fptr = fopen('myfile5.txt', 'w');
-        fwrite($fptr, $buttonJson);
-        fclose($fptr);
+//        $fptr = fopen('myfile5.txt', 'w');
+//        fwrite($fptr, $buttonJson);
+//        fclose($fptr);
         $body = '{
                   "recipient_type": "individual",
                   "messaging_product": "whatsapp",
@@ -257,6 +357,58 @@ class WebhookController extends Controller
                     }
                   }
                 }';
+        $request = new \GuzzleHttp\Psr7\Request('POST', 'https://graph.facebook.com/v14.0/'.$this->webhookId().'/messages', $headers, $body);
+        $res = $client->sendAsync($request)->wait();
+        echo $res->getBody();
+    }
+
+    public function sendMsgList($text,$list)
+    {
+        $client = new Client();
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.$this->webhookToken()
+        ];
+
+        $listJson='';
+        foreach($list as $item) {
+            $listJson .= '{
+                            "id": "'.$item['id'].'",
+                            "title": "'.$item['title'].'",
+                            "description": "'.$item['description'].'"
+                          },';
+        }
+
+        $body = '{
+      "recipient_type": "individual",
+      "messaging_product": "whatsapp",
+      "to": "'.$this->phone.'",
+      "type": "interactive",
+      "interactive": {
+        "type": "list",
+        "header": {
+          "type": "text",
+          "text": "'.$text['header'].'"
+        },
+        "body": {
+          "text": "'.$text['body'].'"
+        },
+        "footer": {
+          "text": "'.$text['footer'].'"
+        },
+        "action":{
+          "button": "'.$text['button'].'",
+          "sections":[
+            {
+
+              "rows": [
+                '.$listJson.'
+              ]
+            }
+          ]
+      }
+    }
+  }';
         $request = new \GuzzleHttp\Psr7\Request('POST', 'https://graph.facebook.com/v14.0/'.$this->webhookId().'/messages', $headers, $body);
         $res = $client->sendAsync($request)->wait();
         echo $res->getBody();
