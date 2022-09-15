@@ -95,46 +95,46 @@ class WebhookController extends Controller
         fwrite($fptr, $this->phone . ' ' . $message);
         fclose($fptr);
         $contact=$arr['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'];
-        if ($message == 'hie') {
+        if ($message) {
             $this->sendMsgInteractive(array(
-                'Restaurant Name',
-                'Hie '.$contact.' .Welcome to Restaurant Name whatsapp chatbot. Where you can order food and have it delivered to your doorstep',
+                'Insurance Company Name',
+                'Hie '.$contact.' .Welcome to Insurance Company whatsapp chatbot.',
                 'Get Started'),
                 array(
-                    ['id'=>'pizza','title'=>'Pizza'],
-                    ['id'=>'burger','title'=>'Burgers'],
-                    ['id'=>'drink','title'=>'Drinks']
+                    ['id'=>'register','title'=>'Register'],
+                    ['id'=>'help','title'=>'Get Help'],
+                    ['id'=>'faq','title'=>'FAQ']
                 ));
         }
-        elseif($message == 'bye') {
-            $this->sendMsgList(array(
-                'header'=>'Restaurant Name',
-                'body'=>'Welcome '.$contact.' to Restaurant Name whatsapp chatbot. Where you can order food and have it delivered to your doorstep.',
-                'footer'=>'Get Started',
-                'button'=>'Food Menu'),
-            array(
-                [
-                    'id'=>'pizza',
-                    'title'=>'Pizza',
-                    'description'=>'Meat and Vegan pizzas for you to devour'
-                ],
-                [
-                    'id'=>'burger',
-                    'title'=>'Burgers',
-                    'description'=>'Mouth watering burgers'
-                ],
-                [
-                    'id'=>'deserts',
-                    'title'=>'Deserts',
-                    'description'=>'Tasty treats and sweets'
-                ],
-                [
-                    'id'=>'drink',
-                    'title'=>'Drinks',
-                    'description'=>'You thirsty huh?'
-                ]));
-            //$this->sendMsgText('Thank you for eating here. Have a nice day!!!!');
-        }
+//        elseif($message == 'bye') {
+//            $this->sendMsgList(array(
+//                'header'=>'Restaurant Name',
+//                'body'=>'Welcome '.$contact.' to Restaurant Name whatsapp chatbot. Where you can order food and have it delivered to your doorstep.',
+//                'footer'=>'Get Started',
+//                'button'=>'Food Menu'),
+//            array(
+//                [
+//                    'id'=>'pizza',
+//                    'title'=>'Pizza',
+//                    'description'=>'Meat and Vegan pizzas for you to devour'
+//                ],
+//                [
+//                    'id'=>'burger',
+//                    'title'=>'Burgers',
+//                    'description'=>'Mouth watering burgers'
+//                ],
+//                [
+//                    'id'=>'deserts',
+//                    'title'=>'Deserts',
+//                    'description'=>'Tasty treats and sweets'
+//                ],
+//                [
+//                    'id'=>'drink',
+//                    'title'=>'Drinks',
+//                    'description'=>'You thirsty huh?'
+//                ]));
+//            //$this->sendMsgText('Thank you for eating here. Have a nice day!!!!');
+//        }
 
     }
 
@@ -152,49 +152,64 @@ class WebhookController extends Controller
 //        fwrite($fptr,$arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id'].' response '.implode(',',array_keys($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive'])));
 //        fclose($fptr);
         $this->phone=$arr['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id'];
-        if($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='pizza'){
+        if($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='register'){
             $this->sendMsgInteractive(array(
-                'Pizza Menu',
-                'Please select from our list of pizza types.',
-                'Whats your poison?'),
+                'Register Account',
+                'Please select insurance type.',
+                'Insurance Company Name'),
                 array(
-                    ['id'=>'meat','title'=>'Meat'],
-                    ['id'=>'vegi','title'=>'Vegetarian'],
-                    ['id'=>'mixed','title'=>'Mixed']
+                    ['id'=>'vehicle','title'=>'Vehicle'],
+                    ['id'=>'life','title'=>'Life'],
+                    ['id'=>'funeral','title'=>'Funeral']
                 ));
         }
-        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='meat'){
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='vehicle'){
             $this->sendMsgInteractive(array(
-                'Meat Menu',
-                'Please select from our list of pizza below.',
-                'Wolf Bites'),
+                'Vehicle Menu',
+                'Please select from our list of vehicle classes.',
+                'Insurance Company Name'),
                 array(
-                    ['id'=>'chicken','title'=>'Chicken Peri'],
-                    ['id'=>'beef','title'=>'Beef Strog'],
-                    ['id'=>'pepperoni','title'=>'Pepperoni']
+                    ['id'=>'class1','title'=>'Class 1'],
+                    ['id'=>'class2','title'=>'Class 2'],
+                    ['id'=>'class3','title'=>'Class 3']
                 ));
         }
-        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='vegi'){
-            $this->sendMsgInteractive(array(
-                'Vegi Menu',
-                'Please select from our list of pizza below.',
-                'Rabbit Bites'),
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='faq'){
+            $this->sendMsgList(array(
+                'header'=>'Frequently Asked Questions',
+                'body'=>'Click the list below to see the top 5 most asked questions and their answers..',
+                'footer'=>'Insurance Company Name',
+                'button'=>'See Questions'),
                 array(
-                    ['id'=>'mushroom','title'=>'Mushroom'],
-                    ['id'=>'garlic','title'=>'Garlic Mayo'],
-                    ['id'=>'peppermint','title'=>'Peppermint']
-                ));
+                    [
+                        'id'=>'q1',
+                        'title'=>'Question 1',
+                        'description'=>'How much does insurance cost?'
+                    ],
+                    [
+                        'id'=>'q2',
+                        'title'=>'Question 2',
+                        'description'=>'Where can i find your offices?'
+                    ],
+                    [
+                        'id'=>'q3',
+                        'title'=>'Question 3',
+                        'description'=>'Can i pay on my phone?'
+                    ],
+                    [
+                        'id'=>'q4',
+                        'title'=>'Question 4',
+                        'description'=>'What types of insurance do you offer?'
+                    ],
+                    [
+                        'id'=>'q5',
+                        'title'=>'Question 5',
+                        'description'=>'What are your contact details?'
+                    ]));
+
         }
-        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='mixed'){
-            $this->sendMsgInteractive(array(
-                'Mixed Menu',
-                'Please select from our list of pizza below.',
-                'Half Bites'),
-                array(
-                    ['id'=>'chicken_mushroom','title'=>'Chicken Mush'],
-                    ['id'=>'four_seasons','title'=>'4 Seasons'],
-                    ['id'=>'pizza_name','title'=>'Idk Pizza Name']
-                ));
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='help'){
+            $this->sendMsgText('Ndoziva kuti urikuda kubatsirwa chitora number idzi 077123456789 tikupe detail rese.');
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='burger'){
             $this->sendMsgInteractive(array(
@@ -207,15 +222,26 @@ class WebhookController extends Controller
                     ['id'=>'cheese_burger','title'=>'Cheese Burger']
                 ));
         }
-        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='drink'){
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='life'){
             $this->sendMsgInteractive(array(
-                'Drink Menu',
-                'Please select a drink type.',
-                'Thirsty?'),
+                'Life Insurance',
+                'Please select a package.',
+                'Insurance Company Name'),
                 array(
-                    ['id'=>'juice','title'=>'Juice'],
-                    ['id'=>'fizzy_drink','title'=>'Fizzy Drink'],
-                    ['id'=>'water','title'=>'Water']
+                    ['id'=>'basic_life','title'=>'Basic'],
+                    ['id'=>'classic_life','title'=>'Classic'],
+                    ['id'=>'pro_life','title'=>'Life Pro Max']
+                ));
+        }
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='funeral'){
+            $this->sendMsgInteractive(array(
+                'Funeral Cover',
+                'Please select a package.',
+                'Insurance Company Name'),
+                array(
+                    ['id'=>'cheap','title'=>'Cheap'],
+                    ['id'=>'less_cheap','title'=>'Less Cheap'],
+                    ['id'=>'zvirinani','title'=>'Zvirinani']
                 ));
         }
 
@@ -224,68 +250,25 @@ class WebhookController extends Controller
     public function handleList($arr)
     {
         $this->phone=$arr['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id'];
-    if($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='pizza'){
+        if($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q1'){
 
-        $this->sendMsgList(array(
-            'header'=>'Pizza Menu',
-            'body'=>'Welcome to our pizza menu of meat and vegan options.',
-            'footer'=>'Copyright 2022',
-            'button'=>'Pizza Menu'),
-            array(
-                [
-                    'id'=>'pizza_pepperoni',
-                    'title'=>'Pepperoni Pizza',
-                    'description'=>'Pepperoni and cheese pizza'
-                ],
-                [
-                    'id'=>'pizza_pineapple',
-                    'title'=>'Pineapple Pizza',
-                    'description'=>'The wierd kid of the pizza family'
-                ],
-                [
-                    'id'=>'pizza_mushroom',
-                    'title'=>'Mushroom Pizza',
-                    'description'=>'Someone actually orders this pizza?'
-                ],
-                [
-                    'id'=>'pizza_chicken_mushroom',
-                    'title'=>'Chicken Mushroom Pizza',
-                    'description'=>'The best pizza on the planet, fight me if you disagree'
-                ]));
+            $this->sendMsgText('Insurance costs varies depending with your requirements.Life insurance has 3 packages namely a, b and c which cost x,y and z respectively. Funeral cover offers basic and pro which cost expensive and even more expensive dollars per month');
+            }
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q2'){
+
+            $this->sendMsgText('You can find our offices at corner x and y street.');
         }
-        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='burger'){
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q3'){
 
-            $this->sendMsgList(array(
-                'header'=>'Burger Menu',
-                'body'=>'Welcome to our burger menu of meat and vegan options.',
-                'footer'=>'Copyright 2022',
-                'button'=>'Burger Menu'),
-                array(
-                    [
-                        'id'=>'burger_plain',
-                        'title'=>'Beef Burger',
-                        'description'=>'Ground Beef Burger'
-                    ],
-                    [
-                        'id'=>'burger_cheese',
-                        'title'=>'Cheese Burger',
-                        'description'=>'Ground Beef and Cheese Burger'
-                    ],
-                    [
-                        'id'=>'burger_chilli',
-                        'title'=>'Beef Chilli Burger',
-                        'description'=>'Its time to harass your taste buds'
-                    ],
-                    [
-                        'id'=>'burger_vegan',
-                        'title'=>'Vegan Burger',
-                        'description'=>'For all the people who hate fun'
-                    ],
-                    [
-                        'id'=>'burger_chicken',
-                        'title'=>'Chicken Burger',
-                        'description'=>'Why for the love of god why?'
-                    ]));
+            $this->sendMsgText('Yes we are integrated with paynow allowing you to make remote payments.');
+        }
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q4'){
+
+            $this->sendMsgText('We offer Life Insurance, Medical Insurance, Funeral Cover and Car Insurance.');
+        }
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q5'){
+
+            $this->sendMsgText('You can call us on our toll free number at 077123456789 or contact us at email@companyname.com');
         }
     }
 
