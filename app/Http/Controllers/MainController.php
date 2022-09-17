@@ -14,4 +14,9 @@ class MainController extends Controller
         }
         return view('welcome');
     }
+
+    public function showDashboard()
+    {
+        return view('pages.dashboard');
+    }
 }

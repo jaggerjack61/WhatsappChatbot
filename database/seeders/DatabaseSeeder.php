@@ -20,7 +20,9 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-        
+
+        WhatsappSettings::class->run();
+        SuperUser::class->run();
 
     }
 }
