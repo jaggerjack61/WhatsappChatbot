@@ -15,9 +15,9 @@ return new class extends Migration
     {
         Schema::create('whatsapp_messages', function (Blueprint $table) {
             $table->id();
-            $table->string('message_id');
-            $table->string('customer_id');
+            $table->string('client_id');
             $table->string('message');
+            $table->string('message_type')->default('none');
             $table->timestamps();
         });
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use App\Models\WhatsappMessage;
 use App\Models\WhatsappSetting;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Http;
 class WebhookController extends Controller
 {
     public $phone;
+    public $company ='Company Name';
 
 
     public function webhookSetup(Request $request)
@@ -47,13 +49,17 @@ class WebhookController extends Controller
     public function webhookReceiver(Request $request)
     {
 
-        $fptr = fopen('myfile.txt', 'w');
+        $fptr = fopen('myfile.json', 'w');
         fwrite($fptr, json_encode($request->all()));
         fclose($fptr);
         $arr = $request->all();
 
 
+
+
         if(array_key_exists('messages',$arr['entry'][0]['changes'][0]['value'])){
+            $this->phone=$arr['entry'][0]['changes'][0]['value']['messages'][0]['from'] ?? 'no number';
+
             if(array_key_exists('text',$arr['entry'][0]['changes'][0]['value']['messages'][0])){
                 $this->handleMsg($arr);
             }
@@ -66,6 +72,15 @@ class WebhookController extends Controller
                     $this->handleList($arr);
 
                 }
+            }
+            elseif(array_key_exists('image',$arr['entry'][0]['changes'][0]['value']['messages'][0])) {
+//                $fptr1 = fopen('myfilex.txt', 'w');
+//                fwrite($fptr1, $arr['entry'][0]['changes'][0]['value']['messages'][0]['image']['id'].json_encode($arr['entry'][0]['changes'][0]['value']['messages'][0]['image']));
+//                fclose($fptr1);
+
+                $this->handleImage($arr);
+
+                //return response('',200);
             }
 
 //            $keys=$arr['entry'][0]['changes'][0]['value']['messages'][0];
@@ -84,6 +99,62 @@ class WebhookController extends Controller
     }
 
 
+
+    public function handleImage($arr)
+    {
+
+        $mediaId=$arr['entry'][0]['changes'][0]['value']['messages'][0]['image']['id'];
+        $url=$this->retrieveMediaUrl($mediaId);
+
+        $client=\App\Models\Client::where('phone_no',$this->phone)->first();
+        if($client){
+            $saveMsg=WhatsappMessage::create([
+                'client_id' => $client->id,
+                'message' => 'image:'.$mediaId,
+
+            ]);
+        }
+        else{
+            $client=\App\Models\Client::create([
+                'phone_no' => $this->phone
+            ]);
+        }
+
+        if($client->message_status=='none'){
+
+        $this->sendMsgText('Thanks for the pic ,but please select from our list of menu items');
+        }
+        elseif($client->message_status=='register_name'){
+
+            $this->sendMsgText('Please write your name in full');
+        }
+        elseif($client->message_status=='register_id'){
+            //save image of id here
+            $this->downloadMedia($url,'id');
+
+            $client->update([
+                'message_status'=>'register_payslip'
+            ]);
+            $client->save();
+            $this->sendMsgText('Please send a picture of your payslip');
+        }
+        elseif($client->message_status=='register_payslip'){
+            //save image of id here
+            $this->downloadMedia($url,'payslip');
+
+            $client->update([
+                'message_status'=>'none',
+                'status' =>'pending'
+            ]);
+            $client->save();
+            $this->sendMsgText('Your registration is pending approval');
+        }
+
+
+
+    }
+
+
     public function handleMsg($arr)
     {
 
@@ -91,21 +162,112 @@ class WebhookController extends Controller
         $fptr = fopen('myfile2.txt', 'w');
         //$status = $arr['entry'][0]['changes'][0]['value']['statuses']['status'];
         $message=$arr['entry'][0]['changes'][0]['value']['messages'][0]['text']['body'];
-        $this->phone=$arr['entry'][0]['changes'][0]['value']['messages'][0]['from'] ?? 'no number';
+//        if($arr['entry'][0]['changes'][0]['value']['messages'][0]['type']=='image'){
+
+//        }
+//        if($arr['entry'][0]['changes'][0]['value']['messages'][0]['type'] == 'image'){
+//
+//            $this->retrieveMediaUrl($arr['entry'][0]['changes'][0]['value']['messages'][0]['image']['id']);
+//        }
+
+        $client=\App\Models\Client::where('phone_no',$this->phone)->first();
+        if($client){
+            $saveMsg=WhatsappMessage::create([
+                'client_id' => $client->id,
+                'message' => $message,
+
+            ]);
+        }
+        else{
+            $client=\App\Models\Client::create([
+                'phone_no' => $this->phone
+            ]);
+        }
+
         fwrite($fptr, $this->phone . ' ' . $message);
         fclose($fptr);
         $contact=$arr['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'];
-        if ($message) {
-            $this->sendMsgInteractive(array(
-                'Insurance Company Name',
-                'Hie '.$contact.' .Welcome to Insurance Company whatsapp chatbot.',
-                'Get Started'),
-                array(
-                    ['id'=>'register','title'=>'Register'],
-                    ['id'=>'help','title'=>'Get Help'],
-                    ['id'=>'faq','title'=>'FAQ']
-                ));
+        if($client->message_status=='none'){
+            $name=$client->name??$contact;
+            if($client->status=='pending'){
+
+                $this->sendMsgInteractive(array(
+                    $this->company,
+                    'Hie '.$name.' .Welcome to '.$this->company.' whatsapp chatbot.Your registration is pending review.',
+                    'Getting Started'),
+                    array(
+
+                        ['id'=>'help','title'=>'Get Help'],
+                        ['id'=>'faq','title'=>'FAQ']
+                    ));
+            }
+            elseif($client->status=='registered'){
+
+                $this->sendMsgInteractive(array(
+                    $this->company,
+                    'Hie '.$name.' .Welcome to '.$this->company.' whatsapp chatbot.',
+                    'Getting Started'),
+                    array(
+                        ['id'=>'loan','title'=>'Apply for loan'],
+                        ['id'=>'help','title'=>'Get Help'],
+                        ['id'=>'faq','title'=>'FAQ']
+                    ));
+            }
+            elseif($client->status=='denied'){
+
+                $this->sendMsgInteractive(array(
+                    $this->company,
+                    'Hie '.$name.' .Welcome to '.$this->company.' whatsapp chatbot.Unfortunately it seems your registration has been denied.Call for more information.',
+                    'Getting Started'),
+                    array(
+                        ['id'=>'register','title'=>'Re-register'],
+                        ['id'=>'help','title'=>'Get Help'],
+                        ['id'=>'faq','title'=>'FAQ']
+                    ));
+            }
+            else{
+                $this->sendMsgInteractive(array(
+                    $this->company,
+                    'Hie '.$name.' .Welcome to '.$this->company.' whatsapp chatbot.',
+                    'Get Started'),
+                    array(
+                        ['id'=>'register','title'=>'Register'],
+                        ['id'=>'help','title'=>'Get Help'],
+                        ['id'=>'faq','title'=>'FAQ']
+                    ));
+            }
+
+
         }
+        elseif($client->message_status=='register_name'){
+            $client->update([
+                'name'=>$message,
+                'message_status'=>'register_id'
+            ]);
+            $client->save();
+            $this->sendMsgText('Please send a picture of your national id or drivers licence');
+        }
+        elseif($client->message_status=='register_id'){
+            //save image of id here
+
+            $client->update([
+                'message_status'=>'register_payslip'
+            ]);
+            $client->save();
+            $this->sendMsgText('Please send a picture of your national id or drivers licence');
+        }
+
+        elseif($client->message_status=='register_id'){
+            //save image of id here
+
+            $client->update([
+                'message_status'=>'none',
+                'status'=>'pending'
+            ]);
+            $client->save();
+            $this->sendMsgText('Your registration is pending approval from our administrators.');
+        }
+
 //        elseif($message == 'bye') {
 //            $this->sendMsgList(array(
 //                'header'=>'Restaurant Name',
@@ -153,15 +315,12 @@ class WebhookController extends Controller
 //        fclose($fptr);
         $this->phone=$arr['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id'];
         if($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='register'){
-            $this->sendMsgInteractive(array(
-                'Register Account',
-                'Please select insurance type.',
-                'Insurance Company Name'),
-                array(
-                    ['id'=>'vehicle','title'=>'Vehicle'],
-                    ['id'=>'life','title'=>'Life'],
-                    ['id'=>'funeral','title'=>'Funeral']
-                ));
+            $this->sendMsgText('Please enter your full name.');
+            $client=\App\Models\Client::where('phone_no',$this->phone)->first();
+            $client->update([
+                'message_status' =>'register_name'
+            ]);
+            $client->save();
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='vehicle'){
             $this->sendMsgInteractive(array(
@@ -178,13 +337,13 @@ class WebhookController extends Controller
             $this->sendMsgList(array(
                 'header'=>'Frequently Asked Questions',
                 'body'=>'Click the list below to see the top 5 most asked questions and their answers..',
-                'footer'=>'Insurance Company Name',
+                'footer'=>$this->company,
                 'button'=>'See Questions'),
                 array(
                     [
                         'id'=>'q1',
                         'title'=>'Question 1',
-                        'description'=>'How much does insurance cost?'
+                        'description'=>'Whats the most i can borrow?'
                     ],
                     [
                         'id'=>'q2',
@@ -194,12 +353,12 @@ class WebhookController extends Controller
                     [
                         'id'=>'q3',
                         'title'=>'Question 3',
-                        'description'=>'Can i pay on my phone?'
+                        'description'=>'Can i pay back the loan on my phone on my phone?'
                     ],
                     [
                         'id'=>'q4',
                         'title'=>'Question 4',
-                        'description'=>'What types of insurance do you offer?'
+                        'description'=>'Whats the longest i can take to pay back a loan?'
                     ],
                     [
                         'id'=>'q5',
@@ -211,17 +370,7 @@ class WebhookController extends Controller
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='help'){
             $this->sendMsgText('Ndoziva kuti urikuda kubatsirwa chitora number idzi 077123456789 tikupe detail rese.');
         }
-        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='burger'){
-            $this->sendMsgInteractive(array(
-                'Burger Menu',
-                'Please select from our list of pizza below.',
-                'Open wide!!!'),
-                array(
-                    ['id'=>'beef_burger','title'=>'Beef Burger'],
-                    ['id'=>'chicken_burger','title'=>'Chicken Burger'],
-                    ['id'=>'cheese_burger','title'=>'Cheese Burger']
-                ));
-        }
+
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='life'){
             $this->sendMsgInteractive(array(
                 'Life Insurance',
@@ -233,17 +382,7 @@ class WebhookController extends Controller
                     ['id'=>'pro_life','title'=>'Life Pro Max']
                 ));
         }
-        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='funeral'){
-            $this->sendMsgInteractive(array(
-                'Funeral Cover',
-                'Please select a package.',
-                'Insurance Company Name'),
-                array(
-                    ['id'=>'cheap','title'=>'Cheap'],
-                    ['id'=>'less_cheap','title'=>'Less Cheap'],
-                    ['id'=>'zvirinani','title'=>'Zvirinani']
-                ));
-        }
+
 
     }
 
@@ -252,7 +391,7 @@ class WebhookController extends Controller
         $this->phone=$arr['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id'];
         if($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q1'){
 
-            $this->sendMsgText('Insurance costs varies depending with your requirements.Life insurance has 3 packages namely a, b and c which cost x,y and z respectively. Funeral cover offers basic and pro which cost expensive and even more expensive dollars per month');
+            $this->sendMsgText('That will depend on x and y but generally speaking you can borrow z amount.');
             }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q2'){
 
@@ -264,7 +403,7 @@ class WebhookController extends Controller
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q4'){
 
-            $this->sendMsgText('We offer Life Insurance, Medical Insurance, Funeral Cover and Car Insurance.');
+            $this->sendMsgText('X is the longest loan repayment period we offer.');
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q5'){
 
@@ -395,5 +534,52 @@ class WebhookController extends Controller
         $request = new \GuzzleHttp\Psr7\Request('POST', 'https://graph.facebook.com/v14.0/'.$this->webhookId().'/messages', $headers, $body);
         $res = $client->sendAsync($request)->wait();
         echo $res->getBody();
+    }
+
+    public function retrieveMediaUrl($id)
+    {
+
+
+        $client = new Client();
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.$this->webhookToken()
+        ];
+
+        $request = new \GuzzleHttp\Psr7\Request('GET', 'https://graph.facebook.com/v14.0/'.$id, $headers,'');
+        $res = $client->sendAsync($request)->wait();
+        $mediaArray=json_decode($res->getBody(),true);
+        return $mediaArray['url'];
+
+
+    }
+
+
+
+
+
+    public function downloadMedia($url,$name)
+    {
+        $fptr = fopen('myfilex.txt', 'w');
+        fwrite($fptr,$url);
+        fclose($fptr);
+
+        $client = new Client();
+        if(!(file_exists('clients/'.$this->phone.'/'))){
+            mkdir('clients/'.$this->phone,0755, true);
+        }
+
+        $resource = fopen('clients/'.$this->phone.'/'.$name.'.jpg', 'w');
+
+        $response = $client->request('GET', $url, [
+            'headers' => [
+                'Authorization' => 'Bearer '.$this->webhookToken(),
+                'Cache-Control' => 'no-cache',
+                'Content-Type' => 'application/jpeg'
+            ],
+            'sink' => $resource,
+        ]);
+        fclose($resource);
+
     }
 }
