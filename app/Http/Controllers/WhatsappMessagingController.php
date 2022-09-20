@@ -4,17 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\WhatsappSetting;
 use GuzzleHttp\Client;
-use Illuminate\Http\Request;
+use GuzzleHttp\Psr7\Request;
+
 
 class WhatsappMessagingController extends Controller
 {
-    public function webhookToken():string
+    public function webhookToken()
     {
         $settings=WhatsappSetting::first();
         return $settings->bearer_token;
     }
 
-    public function webhookId():string
+    public function webhookId()
     {
         $settings=WhatsappSetting::first();
         return $settings->whatsapp_id;
@@ -22,6 +23,7 @@ class WhatsappMessagingController extends Controller
 
     public function sendMsgText($phone,$textMsg)
     {
+
         $client = new Client();
         $headers = [
             'Content-Type' => 'application/json',
@@ -38,9 +40,9 @@ class WhatsappMessagingController extends Controller
                 }
             }';
 
-        $request = new \GuzzleHttp\Psr7\Request('POST', 'https://graph.facebook.com/v13.0/'.$this->webhookId().'/messages', $headers, $body);
+        $request = new Request('POST', 'https://graph.facebook.com/v13.0/'.$this->webhookId().'/messages', $headers, $body);
         $res = $client->sendAsync($request)->wait();
-        echo $res->getBody();
+        return 0;
     }
 
     public function checkMsgTime()

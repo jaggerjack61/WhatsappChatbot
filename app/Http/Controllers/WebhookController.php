@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use App\Models\LoanHistory;
 use App\Models\WhatsappMessage;
 use App\Models\WhatsappSetting;
 use Carbon\Carbon;
@@ -257,15 +258,30 @@ class WebhookController extends Controller
             $this->sendMsgText('Please send a picture of your national id or drivers licence');
         }
 
-        elseif($client->message_status=='register_id'){
+        elseif($client->message_status=='loan_amount'){
+            //save image of id here
+
+            $client->message_status='loan_due';
+            $client->save();
+            $loan=LoanHistory::create([
+                'client_id'=>$client->id,
+                'amount'=>$message
+            ]);
+            $loan->save();
+            $this->sendMsgText('Please enter the amount of time you will need to pay back the loan in months.');
+        }
+        elseif($client->message_status=='loan_due'){
             //save image of id here
 
             $client->update([
-                'message_status'=>'none',
-                'status'=>'pending'
+                'message_status'=>'none'
             ]);
             $client->save();
-            $this->sendMsgText('Your registration is pending approval from our administrators.');
+            $loan=LoanHistory::where('client_id',$client->id)->latest()->first();
+            $loan->due_date=$message;
+            $loan->status='pending';
+            $loan->save();
+            $this->sendMsgText('Your loan application is pending review');
         }
 
 //        elseif($message == 'bye') {
@@ -322,16 +338,29 @@ class WebhookController extends Controller
             ]);
             $client->save();
         }
-        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='vehicle'){
-            $this->sendMsgInteractive(array(
-                'Vehicle Menu',
-                'Please select from our list of vehicle classes.',
-                'Insurance Company Name'),
-                array(
-                    ['id'=>'class1','title'=>'Class 1'],
-                    ['id'=>'class2','title'=>'Class 2'],
-                    ['id'=>'class3','title'=>'Class 3']
-                ));
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='loan'){
+
+            $client=\App\Models\Client::where('phone_no',$this->phone)->first();
+            $loan=LoanHistory::where('client_id',$client->id)->latest()->first();
+            if($loan){
+                if($loan->status=='paid'){
+                    $client->message_status='loan_amount';
+                    $client->save();
+                    $this->sendMsgText('Enter the full amount in United States Dollars.');
+                }
+                elseif($loan->status=='pending'){
+                    $this->sendMsgText('You already have a loan that is currently under review. For '.$loan->amount.'USD');
+                }
+                elseif($loan->status=='approved'){
+                    $this->sendMsgText('You already have a loan for '.$loan->amount.'USD that you are still in the process of paying back');
+                }
+            }
+            else{
+                $client->message_status='loan_amount';
+                $client->save();
+                $this->sendMsgText('Enter the full amount in United States Dollars.');
+            }
+
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='faq'){
             $this->sendMsgList(array(

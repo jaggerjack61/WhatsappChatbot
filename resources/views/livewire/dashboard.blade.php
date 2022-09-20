@@ -116,9 +116,9 @@
                         @if($loan->status == 'approved')
                             <tr>
                                 <td>{{$loan->owner->name}}</td>
-                                <td>{{$loan->amount.' '.$loan->currency}}}</td>
+                                <td>{{$loan->amount.' '.$loan->currency}}</td>
                                 <td>{{strtoupper($loan->due_date)}}</td>
-                                <td>{{strtoupper($loan->handle_by)}}</td>
+                                <td>{{strtoupper($loan->handler->name)}}</td>
                                 <td><a href="#" class="btn btn-sm btn-success">Paid</a>
                                     <a href="#" class="btn btn-sm btn-danger">Defaulted</a></td>
                             </tr>
@@ -132,7 +132,7 @@
                     <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Amount</th>
+                        <th>Amount(USD)</th>
                         <th>Due Date</th>
                         <th>Action</th>
 
@@ -140,13 +140,13 @@
                     </thead>
                     <tbody>
                     @foreach($loans as $loan)
-                        @if($loan->status == 'approved')
+                        @if($loan->status == 'pending')
                             <tr>
                                 <td>{{$loan->owner->name}}</td>
-                                <td>{{$loan->amount.' '.$loan->currency}}}</td>
+                                <td>{{$loan->amount.' '.$loan->currency}}</td>
                                 <td>{{strtoupper($loan->due_date)}}</td>
-                                <td><a href="#" class="btn btn-sm btn-success">Approve</a>
-                                    <a href="#" class="btn btn-sm btn-danger">Deny</a></td>
+                                <td><a href="#" class="btn btn-sm btn-success" wire:click="approveLoan('{{$loan->id}}')">Approve</a>
+                                    <a href="#" class="btn btn-sm btn-danger" wire:click="denyLoan('{{$loan->id}}')">Deny</a></td>
                             </tr>
                         @endif
                     @endforeach
@@ -170,11 +170,11 @@
                         @if($loan->status == 'denied')
                             <tr>
                                 <td>{{$loan->owner->name}}</td>
-                                <td>{{$loan->amount.' '.$loan->currency}}}</td>
+                                <td>{{$loan->amount.' '.$loan->currency}}</td>
                                 <td>{{strtoupper($loan->due_date)}}</td>
-                                <td>{{strtoupper($loan->handle_by)}}</td>
-                                <td><a href="#" class="btn btn-sm btn-success">Paid</a>
-                                    <a href="#" class="btn btn-sm btn-danger">Defaulted</a></td>
+                                <td>{{strtoupper($loan->handler->name)}}</td>
+                                <td><a href="#" class="btn btn-sm btn-success" wire:click="approveLoan('{{$loan->id}}')">Approve</a>
+
                             </tr>
                         @endif
                     @endforeach
