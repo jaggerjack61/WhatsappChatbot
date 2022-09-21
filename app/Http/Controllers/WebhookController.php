@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Http;
 class WebhookController extends Controller
 {
     public $phone;
-    public $company ='Company Name';
+    public $company ='Virl Micro-Finance';
 
 
     public function webhookSetup(Request $request)
@@ -382,7 +382,7 @@ class WebhookController extends Controller
                     [
                         'id'=>'q3',
                         'title'=>'Question 3',
-                        'description'=>'Can i pay back the loan on my phone on my phone?'
+                        'description'=>'How do i collect my loan?'
                     ],
                     [
                         'id'=>'q4',
@@ -397,7 +397,7 @@ class WebhookController extends Controller
 
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='help'){
-            $this->sendMsgText('Ndoziva kuti urikuda kubatsirwa chitora number idzi 077123456789 tikupe detail rese.');
+            $this->sendMsgText('Contact us on 077123456789 for more info.');
         }
 
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='life'){
@@ -428,7 +428,7 @@ class WebhookController extends Controller
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q3'){
 
-            $this->sendMsgText('Yes we are integrated with paynow allowing you to make remote payments.');
+            $this->sendMsgText('The money will be deposited into your bank account.');
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q4'){
 

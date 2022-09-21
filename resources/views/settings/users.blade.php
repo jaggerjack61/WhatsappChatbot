@@ -86,7 +86,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="inputEmail">Name</label>
-                                <input type="text" name="name" class="form-control" id="inputEmail" placeholder="Email">
+                                <input type="text" name="name" class="form-control" id="inputEmail" placeholder="Full name">
                             </div>
                             <div class="form-group">
                                 <label for="inputPassword">Password</label>

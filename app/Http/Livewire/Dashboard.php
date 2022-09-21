@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Http\Controllers\WhatsappMessagingController;
 use App\Models\Client;
 use App\Models\LoanHistory;
+use App\Models\PaymentsLedger;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Component;
 
@@ -12,11 +13,31 @@ class Dashboard extends Component
 {
     use LivewireAlert;
 
+    public $amount;
+    public $loanId;
+    public $notes;
+    public $renderState=1;
+    public $tab;
+
+    public function mount(){
+        $this->tab=1;
+    }
+
+    public function set($data)
+    {
+        $this->tab=$data;
+    }
+
     public function render()
     {
+//        if($this->renderState==0) {
+//            $this->renderState = 1;
+//            die();
+//        }
         $clients=Client::all();
         $loans=LoanHistory::all();
-        return view('livewire.dashboard',compact('clients','loans'));
+        $payments=PaymentsLedger::all();
+        return view('livewire.dashboard',compact('clients','loans','payments'));
     }
 
     public function register($id)
@@ -86,5 +107,30 @@ class Dashboard extends Component
             $loan->owner->phone_no,
             'Your loan application has been denied. If you believe there has been a mistake contact us on.'
         );
+    }
+
+    public function setLoanId($loanId)
+    {
+        $this->loanId = $loanId;
+//        $this->renderState=0;
+    }
+
+    public function payLoan()
+    {
+        $ledger=PaymentsLedger::create([
+            'loan_id' => $this->loanId,
+            'amount' => $this->amount,
+            'notes'=>$this->notes
+        ]);
+        $ledger->save();
+        $this->alert('success','You have successfully paid '.$ledger->amount);
+
+    }
+
+    public function defaultLoan($id)
+    {
+        $loan=LoanHistory::find($id);
+        $loan->status = 'defaulted';
+        $loan->save();
     }
 }
