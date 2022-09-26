@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('client_id');
             $table->string('amount');
-            $table->string('currency')->default('USD');
+            $table->string('currency')->default('RTGS');
             $table->string('due_date')->nullable();
             $table->string('status')->default('in-progress');
             $table->string('handled_by')->nullable();

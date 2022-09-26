@@ -14,11 +14,16 @@
         </nav>
         <div class="tab-content" id="nav-tabContent">
             <div class="tab-pane fade {{$tab==1?'show active':''}}" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                <div class="m-2">
+                    <input type="text" class="form-control" placeholder="Search" wire:model="search">
+                </div>
                 <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th>Name</th>
                             <th>Phone Number</th>
+                            <th>EC Number</th>
+                            <th>Bank</th>
                             <th>Status</th>
                             <th>Approved By</th>
                             <th>Action</th>
@@ -31,23 +36,32 @@
                             <tr>
                                 <td>{{$client->name}}</td>
                                 <td>{{$client->phone_no}}</td>
+                                <td>{{strtoupper($client->EC)}}</td>
+                                <td>{{strtoupper($client->bank.':'.$client->account_number)}}</td>
                                 <td>{{strtoupper($client->status)}}</td>
                                 <td>{{$client->handler->name}}</td>
                                 <td><a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#viewClientModal" onclick="
                                     loadImages('{{$client->phone_no}}')">View</a>
                                     <a href="#" wire:click="deny('{{$client->id}}')" class="btn btn-sm btn-danger">Un-register</a></td>
                             </tr>
+
                             @endif
                         @endforeach
+                        <tr>{{$clients->links()}}</tr>
                     </tbody>
                 </table>
             </div>
             <div class="tab-pane fade {{$tab==2?'show active':''}}"  id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                <div class="m-2">
+                    <input type="text" class="form-control" placeholder="Search" wire:model="search">
+                </div>
                 <table class="table table-bordered">
                     <thead>
                     <tr>
                         <th>Name</th>
                         <th>Phone Number</th>
+                        <th>EC Number</th>
+                        <th>Bank</th>
                         <th>Status</th>
                         <th>Action</th>
 
@@ -59,6 +73,8 @@
                             <tr>
                                 <td>{{$client->name}}</td>
                                 <td>{{$client->phone_no}}</td>
+                                <td>{{strtoupper($client->EC)}}</td>
+                                <td>{{strtoupper($client->bank.':'.$client->account_number)}}</td>
                                 <td>{{strtoupper($client->status)}}</td>
                                 <td><a href="#" wire:click="register('{{$client->id}}')" class="btn btn-sm btn-success">Register</a>
                                     <a href="#" wire:click="deny('{{$client->id}}')" class="btn btn-sm btn-danger">Deny</a>
@@ -67,17 +83,24 @@
 
                                 </td>
                             </tr>
+
                         @endif
                     @endforeach
+                    <tr>{{$clients->links()}}</tr>
                     </tbody>
                 </table>
             </div>
             <div class="tab-pane fade {{$tab==3?'show active':''}}" id="nav-profile1" role="tabpanel" aria-labelledby="nav-profile-tab">
+                <div class="m-2">
+                    <input type="text" class="form-control" placeholder="Search" wire:model="search">
+                </div>
                 <table class="table table-bordered">
                     <thead>
                     <tr>
                         <th>Name</th>
                         <th>Phone Number</th>
+                        <th>EC Number</th>
+                        <th>Bank</th>
                         <th>Status</th>
                         <th>Denied By</th>
                         <th>Action</th>
@@ -90,16 +113,21 @@
                             <tr>
                                 <td>{{$client->name}}</td>
                                 <td>{{$client->phone_no}}</td>
+                                <td>{{strtoupper($client->EC)}}</td>
+                                <td>{{strtoupper($client->bank.':'.$client->account_number)}}</td>
                                 <td>{{strtoupper($client->status)}}</td>
                                 <td>{{$client->handler->name}}</td>
                                 <td><a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#viewClientModal" onclick="
                                     loadImages('{{$client->phone_no}}')">View</a>
                                     <a href="#" wire:click="register('{{$client->id}}')" class="btn btn-sm btn-success">Register</a></td>
                             </tr>
+
                         @endif
                     @endforeach
+
                     </tbody>
                 </table>
+                {{$clients->links()}}</td>
             </div>
             <div class="tab-pane fade {{$tab==4?'show active':''}}"  id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
                 <table class="table table-bordered">
@@ -135,10 +163,11 @@
                                     @endfor
                                     {{$total.' '.$loan->currency}}
                                 </td>
-                                <td>{{strtoupper($loan->due_date)}}</td>
+                                <td>{{date('Y-m-d', strtotime("+".$loan->due_date." months", strtotime($loan->updated_at)))}}</td>
                                 <td>{{strtoupper($loan->handler->name)}}</td>
                                 <td><a href="#" wire:click.stop="setLoanId('{{$loan->id}}')" data-bs-toggle="modal" data-bs-target="#addPaymentModal" class="btn btn-sm btn-success">Pay</a>
-                                    <a href="#" wire:click="defaultLoan('{{$loan->id}}')" class="btn btn-sm btn-danger">Default</a></td>
+                                    <a href="#" wire:click="defaultLoan('{{$loan->id}}')" class="btn btn-sm btn-danger">Default</a>
+                                <a href="#" wire:click="completeLoan('{{$loan->id}}')" class="btn btn-sm btn-primary">Complete</a></td>
                             </tr>
                         @endif
                     @endforeach
@@ -150,7 +179,7 @@
                     <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Amount(USD)</th>
+                        <th>Amount(RTGS)</th>
                         <th>Due Date</th>
                         <th>Action</th>
 
@@ -162,7 +191,7 @@
                             <tr>
                                 <td>{{$loan->owner->name}}</td>
                                 <td>{{$loan->amount.' '.$loan->currency}}</td>
-                                <td>{{strtoupper($loan->due_date)}}</td>
+                                <td>{{$loan->due_date.' Months'}}</td>
                                 <td><a href="#" class="btn btn-sm btn-success" wire:click="approveLoan('{{$loan->id}}')">Approve</a>
                                     <a href="#" class="btn btn-sm btn-danger" wire:click="denyLoan('{{$loan->id}}')">Deny</a></td>
                             </tr>
@@ -189,7 +218,7 @@
                             <tr>
                                 <td>{{$loan->owner->name}}</td>
                                 <td>{{$loan->amount.' '.$loan->currency}}</td>
-                                <td>{{strtoupper($loan->due_date)}}</td>
+                                <td>{{strtoupper($loan->due_date)}} Months</td>
                                 <td>{{strtoupper($loan->handler->name)}}</td>
                                 <td><a href="#" class="btn btn-sm btn-success" wire:click="approveLoan('{{$loan->id}}')">Approve</a>
 
@@ -207,7 +236,7 @@
                         <th>Amount</th>
 
 
-                        <th>Action</th>
+
 
                     </tr>
                     </thead>
@@ -218,7 +247,6 @@
                                 <td>{{$loan->owner->name}}</td>
                                 <td>{{$loan->amount.' '.$loan->currency}}</td>
 
-                                <td><a href="#" class="btn btn-sm btn-success">View</a>
 
                             </tr>
                         @endif
@@ -234,7 +262,7 @@
                         <th>Amount</th>
 
 
-                        <th>Action</th>
+
 
                     </tr>
                     </thead>
@@ -245,7 +273,7 @@
                                 <td>{{$loan->owner->name}}</td>
                                 <td>{{$loan->amount.' '.$loan->currency}}</td>
 
-                                <td><a href="#" class="btn btn-sm btn-success">View</a>
+
 
                             </tr>
                         @endif

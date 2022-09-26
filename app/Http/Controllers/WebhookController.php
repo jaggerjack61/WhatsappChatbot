@@ -218,10 +218,9 @@ class WebhookController extends Controller
 
                 $this->sendMsgInteractive(array(
                     $this->company,
-                    'Hie '.$name.' .Welcome to '.$this->company.' whatsapp chatbot.Unfortunately it seems your registration has been denied.Call for more information.',
+                    'Hie '.$name.' .Welcome to '.$this->company.' whatsapp chatbot.Unfortunately it seems your registration has been denied.Call  0716808509 for more information.',
                     'Getting Started'),
                     array(
-                        ['id'=>'register','title'=>'Re-register'],
                         ['id'=>'help','title'=>'Get Help'],
                         ['id'=>'faq','title'=>'FAQ']
                     ));
@@ -243,6 +242,30 @@ class WebhookController extends Controller
         elseif($client->message_status=='register_name'){
             $client->update([
                 'name'=>$message,
+                'message_status'=>'register_ec'
+            ]);
+            $client->save();
+            $this->sendMsgText('Please send us your EC number');
+        }
+        elseif($client->message_status=='register_ec'){
+            $client->update([
+                'EC'=>$message,
+                'message_status'=>'register_bank'
+            ]);
+            $client->save();
+            $this->sendMsgText('Please enter the name of the bank you use for RTGS banking.');
+        }
+        elseif($client->message_status=='register_bank'){
+            $client->update([
+                'bank'=>$message,
+                'message_status'=>'register_account'
+            ]);
+            $client->save();
+            $this->sendMsgText('Please enter your RTGS account number.');
+        }
+        elseif($client->message_status=='register_account'){
+            $client->update([
+                'account_number'=>$message,
                 'message_status'=>'register_id'
             ]);
             $client->save();
@@ -268,7 +291,15 @@ class WebhookController extends Controller
                 'amount'=>$message
             ]);
             $loan->save();
-            $this->sendMsgText('Please enter the amount of time you will need to pay back the loan in months.');
+            //$this->sendMsgText('Please enter the amount of time you will need to pay back the loan in months.');
+            $this->sendMsgInteractive(array(
+                'Loan Due Date',
+                'Please enter the amount of time you will need to pay back the loan in months.',
+                $this->company),
+                array(
+                    ['id'=>'cancel_loan','title'=>'Cancel Loan'],
+
+                ));
         }
         elseif($client->message_status=='loan_due'){
             //save image of id here
@@ -346,19 +377,26 @@ class WebhookController extends Controller
                 if($loan->status=='paid'){
                     $client->message_status='loan_amount';
                     $client->save();
-                    $this->sendMsgText('Enter the full amount in United States Dollars.');
+                    $this->sendMsgInteractive(array(
+                        'Loan amount',
+                        'Enter the full amount in RTGS. For USD loans please apply via https://virlmicrofinance.co.zw/application-form-2/.',
+                        $this->company),
+                        array(
+                            ['id'=>'cancel_loan','title'=>'Cancel Loan'],
+
+                        ));
                 }
                 elseif($loan->status=='pending'){
-                    $this->sendMsgText('You already have a loan that is currently under review. For '.$loan->amount.'USD');
+                    $this->sendMsgText('You already have a loan that is currently under review. For '.$loan->amount.'RTGS');
                 }
                 elseif($loan->status=='approved'){
-                    $this->sendMsgText('You already have a loan for '.$loan->amount.'USD that you are still in the process of paying back');
+                    $this->sendMsgText('You already have a loan for '.$loan->amount.'RTGS that you are still in the process of paying back');
                 }
             }
             else{
                 $client->message_status='loan_amount';
                 $client->save();
-                $this->sendMsgText('Enter the full amount in United States Dollars.');
+                $this->sendMsgText('Enter the full amount in RTGS.');
             }
 
         }
@@ -382,7 +420,7 @@ class WebhookController extends Controller
                     [
                         'id'=>'q3',
                         'title'=>'Question 3',
-                        'description'=>'How do i collect my loan?'
+                        'description'=>'How long does it take for a loan to be approved?'
                     ],
                     [
                         'id'=>'q4',
@@ -397,19 +435,16 @@ class WebhookController extends Controller
 
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='help'){
-            $this->sendMsgText('Contact us on 077123456789 for more info.');
+            $this->sendMsgText('Contact us on 0716808509 for more info.');
         }
 
-        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='life'){
-            $this->sendMsgInteractive(array(
-                'Life Insurance',
-                'Please select a package.',
-                'Insurance Company Name'),
-                array(
-                    ['id'=>'basic_life','title'=>'Basic'],
-                    ['id'=>'classic_life','title'=>'Classic'],
-                    ['id'=>'pro_life','title'=>'Life Pro Max']
-                ));
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='cancel_loan'){
+            $client=\App\Models\Client::where('phone_no',$this->phone)->first();
+            $loan=LoanHistory::where('client_id',$client->id)->latest()->first();
+            $loan->delete();
+            $client->message_status='none';
+            $client->save();
+            $this->sendMsgText('Your loan application has been cancelled.');
         }
 
 
@@ -420,23 +455,29 @@ class WebhookController extends Controller
         $this->phone=$arr['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id'];
         if($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q1'){
 
-            $this->sendMsgText('That will depend on x and y but generally speaking you can borrow z amount.');
+            $this->sendMsgText('You can borrow a maximum amount of $5000 and minimum amount of $100.');
             }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q2'){
 
-            $this->sendMsgText('You can find our offices at corner x and y street.');
+            $this->sendMsgText('*Harare* 67 Kwame Nkrumah, 3rd Floor, Takura Building, Harare Zimbabwe.');
+            $this->sendMsgText('*Bulawayo* Masiye Business Suite Suite No 214 Fort Street/9th Avenue');
+            $this->sendMsgText('*Nyanga* 4 Shonalanga Drive, Rochdale, Nyanga');
+            $this->sendMsgText('*Mutasa* Number 221 Hauna Growth Point');
+            $this->sendMsgText('*Rusape* 2455 Chimurenga Street, Rusape');
+            $this->sendMsgText('*Bikita* Stand No 626 Bikita Rural District Council P. O. Box 431');
+            $this->sendMsgText('*Headlands* Plot 1, Headlands Business Centre, Zimpost Headlands');
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q3'){
 
-            $this->sendMsgText('The money will be deposited into your bank account.');
+            $this->sendMsgText('It takes a maximum of up to 7 days for your loan to be approved.');
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q4'){
 
-            $this->sendMsgText('X is the longest loan repayment period we offer.');
+            $this->sendMsgText('6 months is the longest loan repayment period.');
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q5'){
 
-            $this->sendMsgText('You can call us on our toll free number at 077123456789 or contact us at email@companyname.com');
+            $this->sendMsgText('You can call us on 0716808509');
         }
     }
 

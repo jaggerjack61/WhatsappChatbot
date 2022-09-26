@@ -6,7 +6,7 @@
         <nav class="navbar navbar-expand-lg bg-light">
             <div class="container-fluid">
                 @auth()
-                <a class="navbar-brand" href="#">MicroFinance</a>
+                <a class="navbar-brand" href="#">Virl MicroFinance</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
