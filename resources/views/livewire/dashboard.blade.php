@@ -179,7 +179,7 @@
                     <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Amount(RTGS)</th>
+                        <th>Amount</th>
                         <th>Due Date</th>
                         <th>Action</th>
 

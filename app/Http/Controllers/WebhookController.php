@@ -253,7 +253,7 @@ class WebhookController extends Controller
                 'message_status'=>'register_bank'
             ]);
             $client->save();
-            $this->sendMsgText('Please enter the name of the bank you use for RTGS banking.');
+            $this->sendMsgText('Please enter the name of your bank.');
         }
         elseif($client->message_status=='register_bank'){
             $client->update([
@@ -261,7 +261,7 @@ class WebhookController extends Controller
                 'message_status'=>'register_account'
             ]);
             $client->save();
-            $this->sendMsgText('Please enter your RTGS account number.');
+            $this->sendMsgText('Please enter your account number.');
         }
         elseif($client->message_status=='register_account'){
             $client->update([
@@ -283,37 +283,82 @@ class WebhookController extends Controller
 
         elseif($client->message_status=='loan_amount'){
             //save image of id here
+            if(is_numeric($message)){
+                $client->message_status='loan_due';
+                $client->save();
+                $loan=LoanHistory::where('client_id',$client->id)->latest()->first();
 
-            $client->message_status='loan_due';
-            $client->save();
-            $loan=LoanHistory::create([
-                'client_id'=>$client->id,
-                'amount'=>$message
-            ]);
-            $loan->save();
-            //$this->sendMsgText('Please enter the amount of time you will need to pay back the loan in months.');
-            $this->sendMsgInteractive(array(
-                'Loan Due Date',
-                'Please enter the amount of time you will need to pay back the loan in months.',
-                $this->company),
-                array(
-                    ['id'=>'cancel_loan','title'=>'Cancel Loan'],
+                $loan->update([
+                    'client_id'=>$client->id,
+                    'amount'=>$message
+                ]);
+                $loan->save();
+                //$this->sendMsgText('Please enter the amount of time you will need to pay back the loan in months.');
+                $this->sendMsgInteractive(array(
+                    'Loan Due Date',
+                    'Please enter the amount of time you will need to pay back the loan in months.',
+                    $this->company),
+                    array(
+                        ['id'=>'cancel_loan','title'=>'Cancel Loan'],
 
-                ));
+                    ));
+            }
+            else{
+                $this->sendMsgInteractive(array(
+                    'Loan Amount',
+                    'Please enter the amount as a numerical value only. eg 2500 ',
+                    $this->company),
+                    array(
+                        ['id'=>'cancel_loan','title'=>'Cancel Loan'],
+
+                    ));
+            }
+
+        }
+        elseif($client->message_status=='loan_currency'){
+
+                $client->message_status='loan_amount';
+                $client->save();
+                $loan=LoanHistory::create([
+                   'client_id'=>$client->id,
+                   'currency'=>$message
+                ]);
+                $loan->save();
+                $this->sendMsgInteractive(array(
+                    'Loan amount',
+                    'Enter the full amount as a numerical value eg 599',
+                    $this->company),
+                    array(
+                        ['id'=>'cancel_loan','title'=>'Cancel Loan'],
+
+                    ));
+
         }
         elseif($client->message_status=='loan_due'){
-            //save image of id here
+            if(is_numeric($message)){
 
-            $client->update([
-                'message_status'=>'none'
-            ]);
-            $client->save();
-            $loan=LoanHistory::where('client_id',$client->id)->latest()->first();
-            $loan->due_date=$message;
-            $loan->status='pending';
-            $loan->save();
-            $this->sendMsgText('Your loan application is pending review');
-        }
+                $client->update([
+                    'message_status'=>'none'
+                ]);
+                $client->save();
+                $loan=LoanHistory::where('client_id',$client->id)->latest()->first();
+                $loan->due_date=$message;
+                $loan->status='pending';
+                $loan->save();
+                $this->sendMsgText('Your loan application is pending review');
+
+            }
+            else{
+                $this->sendMsgInteractive(array(
+                    'Loan Due Date',
+                    'Please enter the amount of time you will need to pay back the loan in months. eg 3',
+                    $this->company),
+                    array(
+                        ['id'=>'cancel_loan','title'=>'Cancel Loan'],
+
+                    ));
+            }
+}
 
 //        elseif($message == 'bye') {
 //            $this->sendMsgList(array(
@@ -375,28 +420,31 @@ class WebhookController extends Controller
             $loan=LoanHistory::where('client_id',$client->id)->latest()->first();
             if($loan){
                 if($loan->status=='paid'){
-                    $client->message_status='loan_amount';
+                    $client->message_status='loan_currency';
                     $client->save();
                     $this->sendMsgInteractive(array(
-                        'Loan amount',
-                        'Enter the full amount in RTGS. For USD loans please apply via https://virlmicrofinance.co.zw/application-form-2/.',
+                        'Loan currency',
+                        'Enter the loan currency.Either USD or RTGS',
                         $this->company),
                         array(
                             ['id'=>'cancel_loan','title'=>'Cancel Loan'],
 
                         ));
                 }
+                elseif($loan->status=='defaulted'){
+                    $this->sendMsgText('This account can no longer apply for loans as you have previously defaulted on a loan.');
+                }
                 elseif($loan->status=='pending'){
-                    $this->sendMsgText('You already have a loan that is currently under review. For '.$loan->amount.'RTGS');
+                    $this->sendMsgText('You already have a loan that is currently under review. For '.$loan->amount.$loan->currency);
                 }
                 elseif($loan->status=='approved'){
-                    $this->sendMsgText('You already have a loan for '.$loan->amount.'RTGS that you are still in the process of paying back');
+                    $this->sendMsgText('You already have a loan for '.$loan->amount.$loan->currency.' that you are still in the process of paying back');
                 }
             }
             else{
                 $client->message_status='loan_amount';
                 $client->save();
-                $this->sendMsgText('Enter the full amount in RTGS.');
+                $this->sendMsgText('Enter the full amount..');
             }
 
         }
@@ -435,7 +483,7 @@ class WebhookController extends Controller
 
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='help'){
-            $this->sendMsgText('Contact us on 0716808509 for more info.');
+            $this->sendMsgText('Contact us on wa.me/263716808509 for more info.');
         }
 
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='cancel_loan'){

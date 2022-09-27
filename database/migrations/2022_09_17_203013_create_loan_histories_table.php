@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('loan_histories', function (Blueprint $table) {
             $table->id();
             $table->string('client_id');
-            $table->string('amount');
+            $table->string('amount')->nullable();
             $table->string('currency')->default('RTGS');
             $table->string('due_date')->nullable();
             $table->string('status')->default('in-progress');

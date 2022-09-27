@@ -4,7 +4,7 @@
     <div class="p-5 bg-opacity-10" style="background-image:url('/img/login.jpg')">
     <div class="card m-5 justify-content-center align-items-center" style="height: 100%;opacity:0.95">
         <h1 class="card-title text-center">
-            Login
+            Virl Micro Finances
         </h1>
         <h3>
         @if(session()->has('error'))

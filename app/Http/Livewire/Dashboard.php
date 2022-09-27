@@ -130,10 +130,10 @@ class Dashboard extends Component
             'notes'=>$this->notes
         ]);
         $ledger->save();
-        $this->alert('success','You have successfully paid '.$ledger->amount.'RTGS');
+        $this->alert('success','You have successfully paid '.$ledger->amount.$ledger->loan->currency);
         $msg->sendMsgText(
             $ledger->loan->owner->phone_no,
-            'You have credited '.$ledger->amount.'RTGS towards your loan.'
+            'You have credited '.$ledger->amount.$ledger->loan->currency.' towards your loan.'
         );
 
     }
