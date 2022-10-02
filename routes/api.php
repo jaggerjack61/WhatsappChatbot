@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CleanWebhookController;
 use App\Http\Controllers\WebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,3 +21,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::get('/webhook/',[WebhookController::class,'webhookSetup']);
 Route::post('/webhook/',[WebhookController::class,'webhookReceiver']);
+Route::get('/webhook/v2/',[CleanWebhookController::class,'webhookSetup']);
+Route::post('/webhook/v2/',[CleanWebhookController::class,'webhookReceiver']);

@@ -1,1 +1,1 @@
-read status id,status,timestamp,recipient_id
+read status id,status,timestamp,recipient_id,conversation,pricing
