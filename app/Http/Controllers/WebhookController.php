@@ -489,7 +489,10 @@ class WebhookController extends Controller
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='cancel_loan'){
             $client=\App\Models\Client::where('phone_no',$this->phone)->first();
             $loan=LoanHistory::where('client_id',$client->id)->latest()->first();
-            $loan->delete();
+            if($loan){
+                $loan->delete();
+            }
+
             $client->message_status='none';
             $client->save();
             $this->sendMsgText('Your loan application has been cancelled.');
