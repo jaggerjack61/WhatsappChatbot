@@ -223,7 +223,7 @@ class CleanWebhookController extends Controller
                 'message_status'=>'register_ec'
             ]);
             $client->save();
-            $this->sendMsgText('Please send us your EC number');
+            $this->sendMsgText('Please enter your EC number');
         }
         elseif($client->message_status=='register_ec'){
             $client->update([
