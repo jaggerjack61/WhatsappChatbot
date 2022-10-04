@@ -379,7 +379,7 @@ class CleanWebhookController extends Controller
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='faq'){
             $this->sendMsgList(array(
                 'header'=>'Frequently Asked Questions',
-                'body'=>'Click the list below to see the top 5 most asked questions and their answers..',
+                'body'=>'Click the list below to see the top 7 most asked questions and their answers..',
                 'footer'=>$this->company,
                 'button'=>'See Questions'),
                 array(
@@ -407,6 +407,16 @@ class CleanWebhookController extends Controller
                         'id'=>'q5',
                         'title'=>'Question 5',
                         'description'=>'What are your contact details?'
+                    ],
+                    [
+                        'id'=>'q6',
+                        'title'=>'Question 6',
+                        'description'=>'What can i apply for other type of loans?'
+                    ],
+                    [
+                        'id'=>'q7',
+                        'title'=>'Question 7',
+                        'description'=>'Can i get more information on your solar systems?'
                     ]));
 
         }
@@ -422,8 +432,9 @@ class CleanWebhookController extends Controller
                 'Select the currency of the loan.',
                 $this->company),
                 array(
-                    ['id'=>'usd_loan','title'=>'USD'],
                     ['id'=>'rtgs_loan','title'=>'RTGS'],
+                    ['id'=>'cancel_loan','title'=>'Cancel'],
+
 
                 ));
         }
@@ -447,11 +458,6 @@ class CleanWebhookController extends Controller
 
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='cancel_loan'){
             $client=\App\Models\Client::where('phone_no',$this->phone)->first();
-            $loan=LoanHistory::where('client_id',$client->id)->latest()->first();
-            if($loan){
-                $loan->delete();
-            }
-
             $client->message_status='none';
             $client->save();
             $this->sendMsgText('Your loan application has been cancelled.');
@@ -489,6 +495,14 @@ class CleanWebhookController extends Controller
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q5'){
 
             $this->sendMsgText('You can call us on 0716808509');
+        }
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q6'){
+
+            $this->sendMsgText('You can apply for SME loans and USD loans at https://virlmicrofinance.co.zw/application-form-2/');
+        }
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='q7'){
+
+            $this->sendMsgText('For more information on our solar systems please follow this link:wa.me/263716808334');
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['list_reply']['id']=='one_month'){
 
