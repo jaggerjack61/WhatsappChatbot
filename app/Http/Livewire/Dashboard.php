@@ -19,9 +19,11 @@ class Dashboard extends Component
     public $renderState=1;
     public $tab;
     public $search;
+    public $paymentHistory;
 
     public function mount(){
         $this->tab=1;
+        $this->paymentHistory=PaymentsLedger::all();
     }
 
     public function set($data)
@@ -162,5 +164,11 @@ class Dashboard extends Component
             $loan->owner->phone_no,
             'Your loan has been paid back in full. Feel free to apply for another one.'
         );
+    }
+
+    public function viewLoan($id)
+    {
+        $this->paymentHistory=PaymentsLedger::where('loan_id',$id)->get();
+
     }
 }

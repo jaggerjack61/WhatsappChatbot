@@ -42,7 +42,14 @@
                                 <td>{{$client->handler->name}}</td>
                                 <td><a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#viewClientModal" onclick="
                                     loadImages('{{$client->phone_no}}')">View</a>
-                                    <a href="#" wire:click="deny('{{$client->id}}')" class="btn btn-sm btn-danger">Un-register</a></td>
+                                    <span wire:loading.remove wire:target="deny">
+                                    <a href="#" wire:click="deny('{{$client->id}}')" class="btn btn-sm btn-danger">Un-register</a>
+                                    </span>
+                                    <span wire:loading wire:target="deny">
+                                        <a href="#"  class="btn btn-sm btn-danger">Please wait</a>
+                                    </span>
+                                </td>
+
                             </tr>
 
                             @endif
@@ -76,8 +83,19 @@
                                 <td>{{strtoupper($client->EC)}}</td>
                                 <td>{{strtoupper($client->bank.':'.$client->account_number)}}</td>
                                 <td>{{strtoupper($client->status)}}</td>
-                                <td><a href="#" wire:click="register('{{$client->id}}')" class="btn btn-sm btn-success">Register</a>
-                                    <a href="#" wire:click="deny('{{$client->id}}')" class="btn btn-sm btn-danger">Deny</a>
+                                <td>
+                                    <span wire:loading.remove wire:target="register">
+                                    <a href="#" wire:click="register('{{$client->id}}')" class="btn btn-sm btn-success">Register</a>
+                                    </span>
+                                    <span wire:loading wire:target="register">
+                                        <a href="#" class="btn btn-sm btn-success">Please wait...</a>
+                                    </span>
+                                    <span wire:loading.remove wire:target="deny">
+                                    <a href="#" wire:click="deny('{{$client->id}}')" class="btn btn-sm btn-danger">Un-register</a>
+                                    </span>
+                                    <span wire:loading wire:target="deny">
+                                        <a href="#"  class="btn btn-sm btn-danger">Please wait</a>
+                                    </span>
                                     <a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#viewClientModal" onclick="
                                     loadImages('{{$client->phone_no}}')">View</a>
 
@@ -119,7 +137,12 @@
                                 <td>{{$client->handler->name}}</td>
                                 <td><a href="#" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#viewClientModal" onclick="
                                     loadImages('{{$client->phone_no}}')">View</a>
-                                    <a href="#" wire:click="register('{{$client->id}}')" class="btn btn-sm btn-success">Register</a></td>
+                                    <span wire:loading.remove wire:target="register">
+                                    <a href="#" wire:click="register('{{$client->id}}')" class="btn btn-sm btn-success">Register</a>
+                                    </span>
+                                    <span wire:loading wire:target="register">
+                                        <a href="#" class="btn btn-sm btn-success">Please wait...</a>
+                                    </span></td>
                             </tr>
 
                         @endif
@@ -127,7 +150,7 @@
 
                     </tbody>
                 </table>
-                {{$clients->links()}}</td>
+                {{$clients->links()}}
             </div>
             <div class="tab-pane fade {{$tab==4?'show active':''}}"  id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
                 <table class="table table-bordered">
@@ -166,8 +189,22 @@
                                 <td>{{date('Y-m-d', strtotime("+".$loan->due_date." months", strtotime($loan->updated_at)))}}</td>
                                 <td>{{strtoupper($loan->handler->name)}}</td>
                                 <td><a href="#" wire:click.stop="setLoanId('{{$loan->id}}')" data-bs-toggle="modal" data-bs-target="#addPaymentModal" class="btn btn-sm btn-success">Pay</a>
-                                    <a href="#" wire:click="defaultLoan('{{$loan->id}}')" class="btn btn-sm btn-danger">Default</a>
-                                <a href="#" wire:click="completeLoan('{{$loan->id}}')" class="btn btn-sm btn-primary">Complete</a></td>
+                                    <span wire:loading.remove wire:target="defaultLoan">
+                                     <a href="#" wire:click="defaultLoan('{{$loan->id}}')" class="btn btn-sm btn-danger">Default</a>
+                                    </span>
+                                    <span wire:loading wire:target="defaultLoan">
+                                        <a href="#"  class="btn btn-sm btn-danger">Please Wait...</a>
+                                    </span>
+
+                                    <span wire:loading.remove wire:target="completeLoan">
+                                     <a href="#" wire:click="completeLoan('{{$loan->id}}')" class="btn btn-sm btn-primary">Complete</a>
+                                    </span>
+                                    <span wire:loading wire:target="completeLoan">
+                                        <a href="#"  class="btn btn-sm btn-primary">Please Wait...</a>
+                                    </span>
+                                    <a href="#" wire:click="viewLoan('{{$loan->id}}')" data-bs-toggle="modal" data-bs-target="#viewPaymentModal" class="btn btn-sm btn-primary">View</a>
+                                </td>
+
                             </tr>
                         @endif
                     @endforeach
@@ -192,8 +229,21 @@
                                 <td>{{$loan->owner->name}}</td>
                                 <td>{{$loan->amount.' '.$loan->currency}}</td>
                                 <td>{{$loan->due_date.' Months'}}</td>
-                                <td><a href="#" class="btn btn-sm btn-success" wire:click="approveLoan('{{$loan->id}}')">Approve</a>
-                                    <a href="#" class="btn btn-sm btn-danger" wire:click="denyLoan('{{$loan->id}}')">Deny</a></td>
+                                <td>
+                                    <span wire:loading.remove wire:target="approveLoan">
+                                     <a href="#" class="btn btn-sm btn-success" wire:click="approveLoan('{{$loan->id}}')">Approve</a>
+                                    </span>
+                                    <span wire:loading wire:target="approveLoan">
+                                        <a href="#" class="btn btn-sm btn-success">Please Wait...</a>
+                                    </span>
+                                    <span wire:loading.remove wire:target="denyLoan">
+                                     <a href="#" class="btn btn-sm btn-danger" wire:click="denyLoan('{{$loan->id}}')">Deny</a>
+                                    </span>
+                                    <span wire:loading wire:target="denyLoan">
+                                        <a href="#" class="btn btn-sm btn-danger">Please Wait...</a>
+                                    </span>
+
+                                    </td>
                             </tr>
                         @endif
                     @endforeach
@@ -234,6 +284,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Amount</th>
+                        <th>Action</th>
 
 
 
@@ -246,6 +297,7 @@
                             <tr>
                                 <td>{{$loan->owner->name}}</td>
                                 <td>{{$loan->amount.' '.$loan->currency}}</td>
+                                <td><a href="#" wire:click="viewLoan('{{$loan->id}}')" data-bs-toggle="modal" data-bs-target="#viewPaymentModal" class="btn btn-sm btn-primary">View</a></td>
 
 
                             </tr>
@@ -260,9 +312,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Amount</th>
-
-
-
+                        <th>Action</th>
 
                     </tr>
                     </thead>
@@ -272,8 +322,7 @@
                             <tr>
                                 <td>{{$loan->owner->name}}</td>
                                 <td>{{$loan->amount.' '.$loan->currency}}</td>
-
-
+                                <td><a href="#" wire:click="viewLoan('{{$loan->id}}')" data-bs-toggle="modal" data-bs-target="#viewPaymentModal" class="btn btn-sm btn-primary">View</a></td>
 
                             </tr>
                         @endif
@@ -306,6 +355,44 @@
         </div>
     </div>
 
+    <div wire:ignore.self class="modal fade" id="viewPaymentModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">View Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div wire:loading.remove wire:target="viewLoan">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Amount</th>
+                                    <th>Note</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($paymentHistory as $payment)
+                                    <tr>
+                                        <td>{{$payment->amount}}</td>
+                                        <td>{{$payment->notes}}
+                                        <td>{{$payment->created_at}}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <div wire:loading wire:target="viewLoan">
+                            <h3>Please wait....</h3>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
     <div wire:ignore class="modal fade" id="addPaymentModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -318,7 +405,7 @@
 
                         <div class="form-group">
                             <label for="inputEmail">Amount</label>
-                            <input type="text" wire:model.lazy="amount"  name="email" class="form-control" id="inputEmail" placeholder="Amount">
+                            <input type="number" step="0.01" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1').replace('.','.');" wire:model.lazy="amount"  name="email" class="form-control" id="inputEmail" placeholder="Amount">
                         </div>
                         <div class="form-group">
                             <label for="inputEmail">Notes</label>
@@ -326,8 +413,13 @@
                         </div>
 
 
-
-                        <button wire:click="payLoan" class="btn btn-primary m-1">Pay</button><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <span wire:loading.remove wire:target="payLoan">
+                                     <button wire:click="payLoan" class="btn btn-primary m-1">Pay</button>
+                                    </span>
+                    <span wire:loading wire:target="payLoan">
+                                        <button class="btn btn-primary m-1">Please Wait...</button>
+                                    </span>
+                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 
                 </div>
 

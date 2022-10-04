@@ -414,7 +414,7 @@ class CleanWebhookController extends Controller
             $this->sendMsgText('Contact us on wa.me/263716808509 for more info.');
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='sme_loan'){
-            $this->sendMsgText('Visit www.virlmicrofinance.co.zw to apply for SME Loans.');
+            $this->sendMsgText('Visit https://virlmicrofinance.co.zw/application-form-2/ to apply for SME Loans.');
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='ssb_loan'){
             $this->sendMsgInteractive(array(
