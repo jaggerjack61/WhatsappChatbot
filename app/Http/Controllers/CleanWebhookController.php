@@ -779,4 +779,39 @@ class CleanWebhookController extends Controller
         fclose($resource);
 
     }
+
+    public function sendMsgTemplate($template,$data)
+    {
+
+        $client = new Client();
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.$this->webhookToken()
+        ];
+        $body = '{
+          "messaging_product": "whatsapp",
+          "to": "'.$this->phone.'",
+          "type": "template",
+          "template": {
+            "name": "'.$template.'",
+            "language": {
+              "code": "en_GB"
+            }
+          },
+          "components": [
+            {
+              "type": "body",
+              "parameters": [
+                {
+                  "type": "text",
+                  "text": "'.$data.'"
+                }
+              ]
+            }
+          ]
+        }';
+
+        $request = new \GuzzleHttp\Psr7\Request('POST', 'https://graph.facebook.com/v13.0/'.$this->webhookId().'/messages', $headers, $body);
+        $res = $client->sendAsync($request)->wait();
+    }
 }

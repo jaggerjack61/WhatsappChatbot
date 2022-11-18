@@ -17,6 +17,10 @@
                 <div class="m-2">
                     <input type="text" class="form-control" placeholder="Search" wire:model="search">
                 </div>
+
+                <div wire:loading>
+                    Loading...
+                </div>
                 <table class="table table-bordered">
                     <thead>
                         <tr>
@@ -61,6 +65,9 @@
             <div class="tab-pane fade {{$tab==2?'show active':''}}"  id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                 <div class="m-2">
                     <input type="text" class="form-control" placeholder="Search" wire:model="search">
+                </div>
+                <div wire:loading>
+                    Loading...
                 </div>
                 <table class="table table-bordered">
                     <thead>
@@ -112,6 +119,9 @@
                 <div class="m-2">
                     <input type="text" class="form-control" placeholder="Search" wire:model="search">
                 </div>
+                <div wire:loading>
+                    Loading...
+                </div>
                 <table class="table table-bordered">
                     <thead>
                     <tr>
@@ -153,6 +163,12 @@
                 {{$clients->links()}}
             </div>
             <div class="tab-pane fade {{$tab==4?'show active':''}}"  id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+                <div class="m-2">
+                    <input type="text" class="form-control" placeholder="Search" wire:model="search">
+                </div>
+                <div wire:loading>
+                    Loading...
+                </div>
                 <table class="table table-bordered">
                     <thead>
                     <tr>
@@ -212,6 +228,12 @@
                 </table>
             </div>
             <div class="tab-pane fade {{$tab==5?'show active':''}}"  id="nav-contact1" role="tabpanel" aria-labelledby="nav-contact-tab">
+                <div class="m-2">
+                    <input type="text" class="form-control" placeholder="Search" wire:model="search">
+                </div>
+                <div wire:loading>
+                    Loading...
+                </div>
                 <table class="table table-bordered">
                     <thead>
                     <tr>
@@ -251,6 +273,12 @@
                 </table>
             </div>
             <div class="tab-pane fade {{$tab==6?'show active':''}}"  id="nav-contact2" role="tabpanel" aria-labelledby="nav-contact-tab">
+                <div class="m-2">
+                    <input type="text" class="form-control" placeholder="Search" wire:model="search">
+                </div>
+                <div wire:loading>
+                    Loading...
+                </div>
                 <table class="table table-bordered">
                     <thead>
                     <tr>
@@ -279,6 +307,12 @@
                 </table>
             </div>
             <div class="tab-pane fade {{$tab==7?'show active':''}}"  id="nav-contact3" role="tabpanel" aria-labelledby="nav-contact-tab">
+                <div class="m-2">
+                    <input type="text" class="form-control" placeholder="Search" wire:model="search">
+                </div>
+                <div wire:loading>
+                    Loading...
+                </div>
                 <table class="table table-bordered">
                     <thead>
                     <tr>
@@ -307,6 +341,12 @@
                 </table>
             </div>
             <div class="tab-pane fade {{($tab==8)?'show active':''}}"  id="nav-contact4" role="tabpanel" aria-labelledby="nav-contact-tab">
+                <div class="m-2">
+                    <input type="text" class="form-control" placeholder="Search" wire:model="search">
+                </div>
+                <div wire:loading>
+                    Loading...
+                </div>
                 <table class="table table-bordered">
                     <thead>
                     <tr>

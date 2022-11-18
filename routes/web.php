@@ -31,6 +31,9 @@ Route::controller(AuthController::class)->group(function(){
     Route::get('/logout','logout')->name('logout');
 
 });
+Route::controller(MainController::class)->group(function(){
+    Route::get('/policy','showPolicy');
+});
 
 Route::middleware('auth')->group(function () {
 

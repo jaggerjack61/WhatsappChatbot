@@ -125,6 +125,10 @@
                             <label for="inputEmail">Name</label>
                             <input type="text" name="name" class="form-control" id="editName" placeholder="Email">
                         </div>
+                        <div class="form-group">
+                            <label for="inputEmail">Password</label>
+                            <input type="password" name="password" class="form-control" id="" placeholder="Password">
+                        </div>
 
 
 

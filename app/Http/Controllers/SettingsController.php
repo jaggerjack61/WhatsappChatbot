@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class SettingsController extends Controller
 {
@@ -20,9 +21,9 @@ class SettingsController extends Controller
             if($request->password==$request->passwordConfirmation){
                 User::create([
                     'name'=>$request->name,
-                    'access_level'=>$request->userLevel,
+                    'access_level'=>'user',
                     'email'=>$request->email,
-                    'password'=>$request->password,
+                    'password'=>Hash::make($request->password),
 
                 ]);
                 return back()->with('success', 'User has been saved successfully');
@@ -42,7 +43,10 @@ class SettingsController extends Controller
     {
         $user = User::find($request->userId);
         //dd($user,$request->userId);
-        $user->update(['name'=>$request->name,'email'=>$request->email]);
+        $user->update([
+            'name'=>$request->name,
+            'email'=>$request->email,
+            'password'=>Hash::make($request->password)]);
         $user->save();
         return back()->with('success', 'User has been updated successfully');
     }

@@ -45,6 +45,43 @@ class WhatsappMessagingController extends Controller
         return 0;
     }
 
+    public function sendMsgTemplate($phone,$template,$data)
+    {
+
+        $client = new Client();
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer '.$this->webhookToken()
+        ];
+        $body = '{
+                  "messaging_product": "whatsapp",
+                  "recipient_type": "individual",
+                  "to": "'.$phone.'",
+                  "type": "template",
+                  "template": {
+                    "name": "'.$template.'",
+                    "language": {
+                      "code": "en_GB"
+                    },
+                    "components": [
+                      {
+                        "type": "body",
+                        "parameters": [
+                          {
+                            "type": "text",
+                            "text": "'.$data.'"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }';
+
+        $request = new Request('POST', 'https://graph.facebook.com/v13.0/'.$this->webhookId().'/messages', $headers, $body);
+        $res = $client->sendAsync($request)->wait();
+        return 0;
+    }
+
     public function checkMsgTime()
     {
 

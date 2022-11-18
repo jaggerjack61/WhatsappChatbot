@@ -10,7 +10,7 @@ class MainController extends Controller
     {
         $arr=array('name'=>'samuel','age'=>13,'details'=>['sex'=>'male','extra_details'=>['mood'=>'happy']]);
         if(array_key_exists('mood',$arr['details']['extra_details'])){
-            dd('it exists bitch');
+            dd('it exists bit');
         }
         return view('welcome');
     }
@@ -18,5 +18,9 @@ class MainController extends Controller
     public function showDashboard()
     {
         return view('pages.dashboard');
+    }
+    public function showPolicy()
+    {
+        return view('pages.policy');
     }
 }
