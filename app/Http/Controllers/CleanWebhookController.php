@@ -757,9 +757,7 @@ class CleanWebhookController extends Controller
 
     public function downloadMedia($url,$name)
     {
-        $fptr = fopen('myfilex.txt', 'w');
-        fwrite($fptr,$url);
-        fclose($fptr);
+
 
         $client = new Client();
         if(!(file_exists('clients/'.$this->phone.'/'))){
