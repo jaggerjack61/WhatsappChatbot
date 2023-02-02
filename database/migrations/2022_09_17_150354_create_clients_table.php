@@ -20,7 +20,9 @@ return new class extends Migration
             $table->string('EC')->nullable();
             $table->string('bank')->nullable();
             $table->string('account_number')->nullable();
+            $table->string('address')->nullable();
             $table->string('status')->default('guest');
+            $table->string('rough')->nullable();
             $table->string('handled_by')->nullable();
             $table->string('message_status')->default('none');
             $table->timestamps();

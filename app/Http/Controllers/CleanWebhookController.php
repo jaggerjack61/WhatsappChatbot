@@ -26,7 +26,10 @@ class CleanWebhookController extends Controller
         $token=$request->hub_verify_token;
         $challenge=$request->hub_challenge;
         if($mode and $token){
-            return response ($challenge, 200);
+            if(strlen($token)==13){
+                return response ($challenge, 200);
+            }
+
         }
         return response('',404);
 
@@ -47,9 +50,7 @@ class CleanWebhookController extends Controller
     public function webhookReceiver(Request $request)
     {
 
-        $fptr = fopen('myfile.json', 'w');
-        fwrite($fptr, json_encode($request->all()));
-        fclose($fptr);
+
         $arr = $request->all();
 
 
@@ -57,6 +58,13 @@ class CleanWebhookController extends Controller
 
         if(array_key_exists('messages',$arr['entry'][0]['changes'][0]['value'])){
             $this->phone=$arr['entry'][0]['changes'][0]['value']['messages'][0]['from'] ?? 'no number';
+            $client=\App\Models\Client::where('phone_no',$this->phone)->first();
+            if(!$client){
+                \App\Models\Client::create([
+                    'phone_no' => $this->phone
+                ]);
+
+            }
 
             if(array_key_exists('text',$arr['entry'][0]['changes'][0]['value']['messages'][0])){
                 $this->handleMsg($arr);
@@ -96,18 +104,13 @@ class CleanWebhookController extends Controller
         $url=$this->retrieveMediaUrl($mediaId);
 
         $client=\App\Models\Client::where('phone_no',$this->phone)->first();
-        if($client){
-            $saveMsg=WhatsappMessage::create([
-                'client_id' => $client->id,
-                'message' => 'image:'.$mediaId,
+        WhatsappMessage::create([
+            'client_id' => $client->id,
+            'message' => 'image:'.$mediaId,
 
-            ]);
-        }
-        else{
-            $client=\App\Models\Client::create([
-                'phone_no' => $this->phone
-            ]);
-        }
+        ]);
+
+
 
         if($client->message_status=='none'){
 
@@ -148,33 +151,19 @@ class CleanWebhookController extends Controller
     {
 
 
-        $fptr = fopen('myfile2.txt', 'w');
-        //$status = $arr['entry'][0]['changes'][0]['value']['statuses']['status'];
-        $message=$arr['entry'][0]['changes'][0]['value']['messages'][0]['text']['body'];
-//        if($arr['entry'][0]['changes'][0]['value']['messages'][0]['type']=='image'){
 
-//        }
-//        if($arr['entry'][0]['changes'][0]['value']['messages'][0]['type'] == 'image'){
-//
-//            $this->retrieveMediaUrl($arr['entry'][0]['changes'][0]['value']['messages'][0]['image']['id']);
-//        }
+
+
+        $message=$arr['entry'][0]['changes'][0]['value']['messages'][0]['text']['body'];
+
 
         $client=\App\Models\Client::where('phone_no',$this->phone)->first();
-        if($client){
-            $saveMsg=WhatsappMessage::create([
-                'client_id' => $client->id,
-                'message' => $message,
+        WhatsappMessage::create([
+            'client_id' => $client->id,
+            'message' => $message,
 
-            ]);
-        }
-        else{
-            $client=\App\Models\Client::create([
-                'phone_no' => $this->phone
-            ]);
-        }
+        ]);
 
-        fwrite($fptr, $this->phone . ' ' . $message);
-        fclose($fptr);
         $contact=$arr['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'];
         if($client->message_status=='none'){
             $name=$client->name??$contact;
@@ -220,6 +209,14 @@ class CleanWebhookController extends Controller
         elseif($client->message_status=='register_name'){
             $client->update([
                 'name'=>$message,
+                'message_status'=>'register_address'
+            ]);
+            $client->save();
+            $this->sendMsgText('Please enter your full address');
+        }
+        elseif($client->message_status=='register_address'){
+            $client->update([
+                'address'=>$message,
                 'message_status'=>'register_ec'
             ]);
             $client->save();
@@ -267,6 +264,7 @@ class CleanWebhookController extends Controller
 
                 LoanHistory::create([
                     'client_id'=>$client->id,
+                    'currency'=>$client->rough,
                     'amount'=>$message
                 ]);
                 $this->sendMsgList(array(
@@ -315,17 +313,13 @@ class CleanWebhookController extends Controller
 
     public function handleStatus($arr)
     {
-        $fptr = fopen('myfile4.txt', 'w');
-        fwrite($fptr,$arr['entry'][0]['changes'][0]['value']['statuses'][0]['status'].' status '.implode(',',array_keys($arr['entry'][0]['changes'][0]['value']['statuses'][0])));
-        fclose($fptr);
+        return true;
     }
 
     public function handleResponse($arr)
     {
 
-//        $fptr = fopen('myfile3.txt', 'w');
-//        fwrite($fptr,$arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id'].' response '.implode(',',array_keys($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive'])));
-//        fclose($fptr);
+
         $this->phone=$arr['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id'];
         if($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='register'){
             $this->sendMsgText('Please enter your full name.');
@@ -433,24 +427,39 @@ class CleanWebhookController extends Controller
                 $this->company),
                 array(
                     ['id'=>'rtgs_loan','title'=>'RTGS'],
-                    ['id'=>'cancel_loan','title'=>'Cancel'],
+                    ['id'=>'usd_loan','title'=>'USD'],
 
 
                 ));
         }
         elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='usd_loan'){
-            $this->sendMsgText('You can only apply for RTGS loans on this chatbot. To apply for USD loans please visit https://virlmicrofinance.co.zw/application-form-2/');
-        }
-        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='rtgs_loan'){
             $client=\App\Models\Client::where('phone_no',$this->phone)->first();
             if($client->status =='registered'){
                 $client->message_status='loan_amount';
+                $client->rough='USD';
                 $client->save();
                 $this->sendMsgText('Please enter the loan amount as a number only eg 250000.');
 
             }
             elseif($client->status =='guest'){
                 $client->message_status='register_name';
+                $client->rough='USD';
+                $client->save();
+                $this->sendMsgText('Please enter your full name.');
+            }
+        }
+        elseif($arr['entry'][0]['changes'][0]['value']['messages'][0]['interactive']['button_reply']['id']=='rtgs_loan'){
+            $client=\App\Models\Client::where('phone_no',$this->phone)->first();
+            if($client->status =='registered'){
+                $client->message_status='loan_amount';
+                $client->rough='RTGS';
+                $client->save();
+                $this->sendMsgText('Please enter the loan amount as a number only eg 250000.');
+
+            }
+            elseif($client->status =='guest'){
+                $client->message_status='register_name';
+                $client->rough='RTGS';
                 $client->save();
                 $this->sendMsgText('Please enter your full name.');
             }
@@ -649,9 +658,7 @@ class CleanWebhookController extends Controller
                           }
                         },';
         }
-//        $fptr = fopen('myfile5.txt', 'w');
-//        fwrite($fptr, $buttonJson);
-//        fclose($fptr);
+
         $body = '{
                   "recipient_type": "individual",
                   "messaging_product": "whatsapp",

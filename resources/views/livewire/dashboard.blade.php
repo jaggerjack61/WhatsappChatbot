@@ -26,6 +26,7 @@
                         <tr>
                             <th>Name</th>
                             <th>Phone Number</th>
+                            <th>Address</th>
                             <th>EC Number</th>
                             <th>Bank</th>
                             <th>Status</th>
@@ -40,6 +41,7 @@
                             <tr>
                                 <td>{{$client->name}}</td>
                                 <td>{{$client->phone_no}}</td>
+                                <td>{{$client->address}}</td>
                                 <td>{{strtoupper($client->EC)}}</td>
                                 <td>{{strtoupper($client->bank.':'.$client->account_number)}}</td>
                                 <td>{{strtoupper($client->status)}}</td>
@@ -74,6 +76,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Phone Number</th>
+                        <th>Address</th>
                         <th>EC Number</th>
                         <th>Bank</th>
                         <th>Status</th>
@@ -87,6 +90,7 @@
                             <tr>
                                 <td>{{$client->name}}</td>
                                 <td>{{$client->phone_no}}</td>
+                                <td>{{$client->address}}</td>
                                 <td>{{strtoupper($client->EC)}}</td>
                                 <td>{{strtoupper($client->bank.':'.$client->account_number)}}</td>
                                 <td>{{strtoupper($client->status)}}</td>
@@ -127,6 +131,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Phone Number</th>
+                        <th>Address</th>
                         <th>EC Number</th>
                         <th>Bank</th>
                         <th>Status</th>
@@ -141,6 +146,7 @@
                             <tr>
                                 <td>{{$client->name}}</td>
                                 <td>{{$client->phone_no}}</td>
+                                <td>{{$client->address}}</td>
                                 <td>{{strtoupper($client->EC)}}</td>
                                 <td>{{strtoupper($client->bank.':'.$client->account_number)}}</td>
                                 <td>{{strtoupper($client->status)}}</td>
