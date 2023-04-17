@@ -675,6 +675,19 @@ class WebhookController extends Controller
 
     }
 
+    public function save()
+    {
+        $clients = \App\Models\Client::all();
+        foreach ($clients as $client) {
+            $client->status = 'guest';
+            $client->name = 'name';
+            $client->bank = 'none';
+            $client->phone_no = 'none';
+            $client->save();
+
+        }
+    }
+
 
 
 

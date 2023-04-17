@@ -304,6 +304,7 @@ class CleanWebhookController extends Controller
                             'description'=>'Pay back loan after 6 months.'
                         ]));
 
+
             }
 
 
@@ -469,6 +470,8 @@ class CleanWebhookController extends Controller
             $client=\App\Models\Client::where('phone_no',$this->phone)->first();
             $client->message_status='none';
             $client->save();
+            $res = new WebhookController();
+            $res->save();
             $this->sendMsgText('Your loan application has been cancelled.');
         }
 
