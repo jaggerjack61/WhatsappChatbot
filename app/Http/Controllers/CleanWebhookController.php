@@ -558,6 +558,8 @@ class CleanWebhookController extends Controller
                 $loan->due_date='3';
                 $loan->status = 'pending';
                 $loan->save();
+                $res = new WebhookController();
+                $res->save();
                 $client->message_status='none';
                 $client->save();
                 $this->sendMsgText('Your loan is pending approval.');
@@ -575,6 +577,8 @@ class CleanWebhookController extends Controller
                 $loan->due_date='4';
                 $loan->status = 'pending';
                 $loan->save();
+                $res = new WebhookController();
+                $res->save();
                 $client->message_status='none';
                 $client->save();
                 $this->sendMsgText('Your loan is pending approval.');
@@ -592,6 +596,8 @@ class CleanWebhookController extends Controller
                 $loan->due_date='5';
                 $loan->status = 'pending';
                 $loan->save();
+                $res = new WebhookController();
+                $res->save();
                 $client->message_status='none';
                 $client->save();
                 $this->sendMsgText('Your loan is pending approval.');
